@@ -1,5 +1,6 @@
 {
     "name": "adachsoft/debugger",
+    "type": "library",
     "description": "Check your logs in the console.",
     "license": "MIT",
     "keywords": ["Debug", "Logs", "Console"],
@@ -15,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "AdachSoft\\": "src"
+            "AdachSoft\\Debugger\\": "src"
         }
     }
 }
