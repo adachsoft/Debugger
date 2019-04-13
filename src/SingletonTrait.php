@@ -5,16 +5,18 @@ namespace AdachSoft\Debugger;
 /**
  * Define singleton trait.
  */
-trait SingletonTrait {
-     /**
-     * Singleton object.
-     */
+trait SingletonTrait
+{
+    /**
+    * Singleton object.
+    */
     private static $singleton = false;
 
     /**
      * Hide constructor.
      */
-    private function __construct() {
+    private function __construct()
+    {
     }
     
     /**
@@ -22,7 +24,8 @@ trait SingletonTrait {
      *
      * @return void
      */
-    protected function __clone() { 
+    protected function __clone()
+    {
     }
 
     /**
@@ -30,19 +33,22 @@ trait SingletonTrait {
      *
      * @return array
      */
-    protected function __sleep() { 
+    protected function __sleep()
+    {
     }
 
     /**
      * Prevent deserialization of the instance.
      */
-    protected function __wakeup() { 
+    protected function __wakeup()
+    {
     }
 
     /**
      * Get an instance of the class.
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (false === self::$singleton) {
             self::$singleton = new self();
         }

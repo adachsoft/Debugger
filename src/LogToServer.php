@@ -2,8 +2,20 @@
 
 namespace AdachSoft\Debugger;
 
-class LogToServer implements LogInterface{
+class LogToServer implements LogInterface
+{
+    /**
+     * Host
+     *
+     * @var string
+     */
     public $host = '127.0.0.1';
+    
+    /**
+     * Port
+     *
+     * @var integer
+     */
     public $port = 2160;
 
     /**

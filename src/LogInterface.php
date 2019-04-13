@@ -2,7 +2,8 @@
 
 namespace AdachSoft\Debugger;
 
-interface LogInterface{
+interface LogInterface
+{
     /**
      * Log message.
      *

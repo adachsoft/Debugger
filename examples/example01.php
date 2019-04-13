@@ -7,7 +7,7 @@ use AdachSoft\Debugger\LogToServer;
 use AdachSoft\Debugger\ParserPrintR;
 use AdachSoft\Debugger\Deb;
 
-error_reporting( E_ALL );
+error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 

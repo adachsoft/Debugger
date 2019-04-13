@@ -2,7 +2,8 @@
 
 namespace AdachSoft\Debugger;
 
-class LogToFile implements LogInterface{
+class LogToFile implements LogInterface
+{
     public $fileName = 'log.txt';
 
     /**

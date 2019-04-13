@@ -2,7 +2,6 @@
 
 namespace AdachSoft\Debugger;
 
-
 class LogHtml implements LogInterface
 {
     /**

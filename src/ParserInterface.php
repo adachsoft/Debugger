@@ -2,6 +2,7 @@
 
 namespace AdachSoft\Debugger;
 
-interface ParserInterface{
+interface ParserInterface
+{
     public function parse($variable);
 }

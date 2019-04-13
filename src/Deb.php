@@ -4,7 +4,12 @@ namespace AdachSoft\Debugger;
 
 class Deb
 {
-    public static function get()
+    /**
+     * Get instance.
+     *
+     * @return Debugger
+     */
+    public static function get(): Debugger
     {
         return Debugger::getInstance(new LogToServer(), new ParserVarDump());
     }
