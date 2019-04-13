@@ -95,12 +95,23 @@ class Debugger
         $this->logRaw($str);
         $this->numberOfCalls++;
     }
-    
+
+    /**
+     * Start timing.
+     *
+     * @return void
+     */
     public function startTime()
     {
         $this->lastTime = $this->time = \microtime(true);
     }
     
+    /**
+     * Stop the stopwatch and measure the time.
+     *
+     * @param string $label
+     * @return float
+     */
     public function stopTime(string $label = ''): float
     {
         $mt = \microtime(true);
