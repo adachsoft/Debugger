@@ -1,6 +1,7 @@
 {
     "name": "adachsoft/debugger",
     "type": "library",
+    "version": "0.1.1",
     "description": "Check your logs in the console.",
     "license": "MIT",
     "keywords": ["Debug", "Logs", "Console"],
@@ -10,7 +11,8 @@
             "email": "adach_soft@wp4b.pl"
         }
     ],
-    "require": {},
+    "require": {
+    },
     "require-dev": {
         "phpunit/phpunit": "4.0.*"
     },

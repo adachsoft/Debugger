@@ -12,10 +12,28 @@ class Debugger{
      */
     public $logClass;
 
+    /**
+     * Determines whether logs are enabled.
+     *
+     * @var boolean
+     */
     public $isOn = true;
 	public $time = 0.0;
 	public $lastTime = 0.0;
-	public $cntTime = 0;
+
+    /**
+     * 
+     *
+     * @var integer
+     */
+    public $cntTime = 0;
+
+    /**
+     * Number of calls.
+     *
+     * @var integer
+     */
+    public $numberOfCalls = 0;
 
     /**
      * Parser class;
@@ -54,7 +72,7 @@ class Debugger{
 
     public function varDump()
 	{
-		$str = 'VAR_DUMP: ' . date($this->dateFormat) . $this->endLine .  $this->endLine;
+		$str = "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
 		$bt = debug_backtrace();
 		$caller = array_shift($bt);
 		ob_start();
@@ -66,6 +84,7 @@ class Debugger{
 		}
 		$str .= ob_get_clean() .  $this->endLine;
         $this->logRaw($str);
+        $this->numberOfCalls++;
     }
     
     public function startTime()
