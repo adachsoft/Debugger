@@ -1,7 +1,6 @@
 {
     "name": "adachsoft/debugger",
     "type": "library",
-    "version": "1.0.2",
     "description": "Check your logs in the console.",
     "license": "MIT",
     "keywords": ["Debug", "Logs", "Console"],

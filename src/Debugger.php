@@ -79,6 +79,18 @@ class Debugger
         ini_set('display_errors', 1);
     }
 
+    public function setErrorHandler()
+    {
+        set_error_handler(array($this, 'errorHandler'));
+    }
+
+    public function errorHandler(int $errno, string $errstr, string $errfile, int $errline)
+    {
+        $str = $this->errorNumberToString($errno) . "[" . date($this->dateFormat) . "]: {$this->endLine}{$errstr} in {$errfile} {$errline}" . $this->endLine . $this->endLine;
+        $this->logRaw($str);
+        return true;
+    }
+
     public function varDump()
     {
         $str = "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
@@ -132,5 +144,27 @@ class Debugger
         if ($this->isOn) {
             $this->logClass->log($log);
         }
+    }
+
+    /**
+     * Error number to string.
+     *
+     * @param integer $errNo
+     * @return string
+     */
+    private function errorNumberToString(int $errNo): string
+    {
+        switch ($errNo) {
+            case E_USER_ERROR:
+            case E_ERROR:
+                return 'ERROR';
+            case E_USER_WARNING:
+            case E_WARNING:
+                return 'WARNING';
+            case E_USER_NOTICE:
+            case E_NOTICE:
+                return 'NOTICE';
+        }
+        return 'UNKNOWN ERROR';
     }
 }
