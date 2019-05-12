@@ -93,7 +93,8 @@ class Debugger
 
     public function varDump()
     {
-        $str = "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
+        $str = $this->printFirstLine();
+        $str .= "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
         $bt = debug_backtrace();
         $caller = array_shift($bt);
         ob_start();
@@ -166,5 +167,17 @@ class Debugger
                 return 'NOTICE';
         }
         return 'UNKNOWN ERROR';
+    }
+
+    private function printFirstLine(): string
+    {
+        $line = '';
+        if( 0===$this->numberOfCalls ){
+            for($i=0;$i<48;++$i){
+                $line .= '-';
+            }
+            $line .= $this->endLine;
+        }
+        return $line;
     }
 }

@@ -13,4 +13,5 @@ class Deb
     {
         return Debugger::getInstance(new LogToServer(), new ParserVarDump());
     }
+    
 }
