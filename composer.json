@@ -13,11 +13,16 @@
     "require": {
     },
     "require-dev": {
-        "phpunit/phpunit": "4.0.*"
+        "phpunit/phpunit": "^9.4"
     },
     "autoload": {
         "psr-4": {
             "AdachSoft\\Debugger\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     }
 }

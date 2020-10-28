@@ -10,7 +10,7 @@ trait SingletonTrait
     /**
     * Singleton object.
     */
-    private static $singleton = false;
+    private static $singleton;
 
     /**
      * Hide constructor.
@@ -49,10 +49,15 @@ trait SingletonTrait
      */
     public static function getInstance()
     {
-        if (false === self::$singleton) {
+        if (null === self::$singleton) {
             self::$singleton = new self();
         }
 
         return self::$singleton;
+    }
+
+    public static function clearInstance(): void
+    {
+        self::$singleton = null;
     }
 }

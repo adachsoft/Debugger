@@ -2,16 +2,11 @@
 
 namespace AdachSoft\Debugger;
 
+use AdachSoft\Debugger\Log\LogInterface;
+
 class Debugger
 {
     use SingletonTrait;
-
-    /**
-     * Log class.
-     *
-     * @var LogInterface
-     */
-    public $logClass;
 
     /**
      * Determines whether logs are enabled.
@@ -19,32 +14,52 @@ class Debugger
      * @var boolean
      */
     public $isOn = true;
-    public $time = 0.0;
-    public $lastTime = 0.0;
 
     /**
-     *
-     *
-     * @var integer
+     * @var string
      */
-    public $cntTime = 0;
+    public $dateFormat = 'Y-m-d H:i:s';
 
     /**
-     * Number of calls.
-     *
-     * @var integer
+     * @var string
      */
-    public $numberOfCalls = 0;
+    public $endLine = PHP_EOL;
+
+    /**
+     * Log class.
+     *
+     * @var LogInterface
+     */
+    private $logClass;
 
     /**
      * Parser class;
      *
      * @var ParserInterface
      */
-    public $parser;
+    private $parser;
 
-    public $dateFormat = 'Y-m-d H:i:s';
-    public $endLine = PHP_EOL;
+    /**
+     * @var float
+     */
+    private $time = 0.0;
+    
+    /**
+     * @var float
+     */
+    private $lastTime = 0.0;
+
+    /**
+     * @var integer
+     */
+    private $cntTime = 0;
+
+    /**
+     * Number of calls.
+     *
+     * @var integer
+     */
+    private $numberOfCalls = 0;
 
     private function __construct(LogInterface $logClass, ParserInterface $parser)
     {
@@ -61,7 +76,7 @@ class Debugger
      */
     public static function getInstance(LogInterface $logClass, ParserInterface $parser): self
     {
-        if (false === self::$singleton) {
+        if (null === self::$singleton) {
             self::$singleton = new self($logClass, $parser);
         }
 
@@ -81,24 +96,25 @@ class Debugger
 
     public function setErrorHandler()
     {
-        set_error_handler(array($this, 'errorHandler'));
+        set_error_handler([$this, 'errorHandler']);
     }
 
     public function errorHandler(int $errno, string $errstr, string $errfile, int $errline)
     {
         $str = $this->errorNumberToString($errno) . "[" . date($this->dateFormat) . "]: {$this->endLine}{$errstr} in {$errfile} {$errline}" . $this->endLine . $this->endLine;
         $this->logRaw($str);
+
         return true;
     }
 
-    public function varDump()
+    public function varDump(): void
     {
         $str = $this->printFirstLine();
         $str .= "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
         $bt = debug_backtrace();
         $caller = array_shift($bt);
         ob_start();
-        echo $caller['file'] . ' ' . $caller['line'] .  $this->endLine;
+        echo $caller['file'] . ' ' . $caller['line'] . $this->endLine;
         $numargs = func_num_args();
         for ($i = 0; $i < $numargs; ++$i) {
             $this->parser->parse(func_get_arg($i));
@@ -109,12 +125,32 @@ class Debugger
         $this->numberOfCalls++;
     }
 
+    public function backTrace(bool $reverse = false, ?int $limit = null): void
+    {
+        $cntCall = 0;
+        $message = $this->printFirstLine();
+        $backTraceStack = debug_backtrace();
+        if ($reverse) {
+            $backTraceStack = array_reverse($backTraceStack);
+        }
+        foreach($backTraceStack as $backTraceRow) {
+            if ($limit !== null && $limit <= $cntCall) {
+                break;
+            }
+            $message .= "[{$this->numberOfCalls}][{$cntCall}]: " . $backTraceRow['file'] . ':' . $backTraceRow['line'] . $this->endLine;
+            $cntCall++;
+        }
+
+        $this->logRaw($message);
+        $this->numberOfCalls++;
+    }
+
     /**
      * Start timing.
      *
      * @return void
      */
-    public function startTime()
+    public function startTime(): void
     {
         $this->lastTime = $this->time = \microtime(true);
     }
@@ -134,9 +170,10 @@ class Debugger
         if (!empty($label)) {
             $str = "[$label]";
         }
-        static::logRaw('>TIME ' . $this->cntTime . "{$str}: {$t}s, {$t1}s".$this->endLine);
+        $this->logRaw('>TIME ' . $this->cntTime . "{$str}: {$t}s, {$t1}s".$this->endLine);
         ++$this->cntTime;
         $this->lastTime = $mt;
+        
         return $t;
     }
 
@@ -166,18 +203,20 @@ class Debugger
             case E_NOTICE:
                 return 'NOTICE';
         }
+
         return 'UNKNOWN ERROR';
     }
 
     private function printFirstLine(): string
     {
         $line = '';
-        if( 0===$this->numberOfCalls ){
-            for($i=0;$i<48;++$i){
+        if (0 === $this->numberOfCalls){
+            for($i=0; $i < 48; ++$i){
                 $line .= '-';
             }
             $line .= $this->endLine;
         }
+
         return $line;
     }
 }

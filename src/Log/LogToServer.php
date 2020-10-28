@@ -1,6 +1,6 @@
 <?php
 
-namespace AdachSoft\Debugger;
+namespace AdachSoft\Debugger\Log;
 
 class LogToServer implements LogInterface
 {
@@ -22,7 +22,7 @@ class LogToServer implements LogInterface
      * {@inheritDoc}
      *
      */
-    public function log(string $message)
+    public function log(string $message): void
     {
         $this->sendLog($message);
     }
@@ -33,7 +33,7 @@ class LogToServer implements LogInterface
      * @param string $str
      * @return void
      */
-    private function sendLog(string $str)
+    private function sendLog(string $str): void
     {
         $fp = fsockopen($this->host, $this->port, $errno, $errstr, 30);
         if ($fp) {

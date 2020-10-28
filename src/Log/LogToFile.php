@@ -1,6 +1,6 @@
 <?php
 
-namespace AdachSoft\Debugger;
+namespace AdachSoft\Debugger\Log;
 
 class LogToFile implements LogInterface
 {
@@ -8,9 +8,8 @@ class LogToFile implements LogInterface
 
     /**
      * {@inheritDoc}
-     *
      */
-    public function log(string $message)
+    public function log(string $message): void
     {
         file_put_contents($this->fileName, $message);
     }
