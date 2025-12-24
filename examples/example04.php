@@ -1,13 +1,15 @@
 <?php
 
-use AdachSoft\Debugger\Deb;
+declare(strict_types=1);
 
-include '../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-Deb::getTypeWithoutValue()->varDump([12, 72, 360]);
-Deb::getTypeWithoutValue()->varDump(72.12);
-Deb::getTypeWithoutValue()->varDump(null);
-Deb::getTypeWithoutValue()->varDump(2160);
-Deb::getTypeWithoutValue()->varDump('test');
+use AdachSoft\Debugger\DebuggerFactory;
 
-Deb::getTypeWithoutValue()->varDump('test', 432, 1.618, []);
+DebuggerFactory::createTypeWithoutValue()->varDump([12, 72, 360]);
+DebuggerFactory::createTypeWithoutValue()->varDump(72.12);
+DebuggerFactory::createTypeWithoutValue()->varDump(null);
+DebuggerFactory::createTypeWithoutValue()->varDump(2160);
+DebuggerFactory::createTypeWithoutValue()->varDump('test');
+
+DebuggerFactory::createTypeWithoutValue()->varDump('test', 432, 1.618, []);

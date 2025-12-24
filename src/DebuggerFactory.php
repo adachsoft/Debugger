@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AdachSoft\Debugger;
+
+use AdachSoft\Debugger\Log\LogToServer;
+use AdachSoft\Debugger\Parser\TypeWithoutValueParser;
+
+/**
+ * Factory for creating Debugger instances with default dependencies.
+ */
+final class DebuggerFactory
+{
+    public static function create(): Debugger
+    {
+        return new Debugger(new LogToServer(), new ParserVarDump());
+    }
+
+    public static function createTypeWithoutValue(): Debugger
+    {
+        return new Debugger(new LogToServer(), new TypeWithoutValueParser());
+    }
+}

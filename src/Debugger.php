@@ -8,8 +8,6 @@ use AdachSoft\Debugger\Log\LogInterface;
 
 class Debugger
 {
-    use SingletonTrait;
-
     /**
      * Determines whether logs are enabled.
      */
@@ -19,18 +17,8 @@ class Debugger
 
     public string $endLine = PHP_EOL;
 
-    /**
-     * Log class.
-     */
-    private LogInterface $logClass;
-
-    /**
-     * Parser class;
-     */
-    private ParserInterface $parser;
-
     private float $time = 0.0;
-    
+
     private float $lastTime = 0.0;
 
     private int $cntTime = 0;
@@ -40,36 +28,14 @@ class Debugger
      */
     private int $numberOfCalls = 0;
 
-    private function __construct(LogInterface $logClass, ParserInterface $parser)
-    {
-        $this->logClass = $logClass;
-        $this->parser = $parser;
-    }
-
-    /**
-     * Get instance.
-     *
-     * @param LogInterface $logClass
-     * @param ParserInterface $parser
-     * @return self
-     */
-    public static function getInstance(LogInterface $logClass, ParserInterface $parser): self
-    {
-        if (null === self::$singleton) {
-            self::$singleton = new self($logClass, $parser);
-        } else {
-            // Fix: Update dependencies to ensure the requested configuration is applied
-            self::$singleton->logClass = $logClass;
-            self::$singleton->parser = $parser;
-        }
-
-        return self::$singleton;
+    public function __construct(
+        private readonly LogInterface $logClass,
+        private readonly ParserInterface $parser
+    ) {
     }
 
     /**
      * Display all errors.
-     *
-     * @return void
      */
     public static function showAllErrors(): void
     {
@@ -88,7 +54,11 @@ class Debugger
             return false;
         }
 
-        $str = $this->errorNumberToString($errno) . "[" . date($this->dateFormat) . "]: {$this->endLine}{$errstr} in {$errfile} {$errline}" . $this->endLine . $this->endLine;
+        $str = $this->errorNumberToString($errno)
+            . '['
+            . date($this->dateFormat)
+            . "]: {$this->endLine}{$errstr} in {$errfile} {$errline}{$this->endLine}{$this->endLine}";
+
         $this->logRaw($str);
 
         return true;
@@ -97,77 +67,81 @@ class Debugger
     public function varDump(mixed ...$vars): void
     {
         $str = $this->printFirstLine();
-        $str .= "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
-        
-        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-        $caller = $bt[0] ?? ['file' => 'unknown', 'line' => 0];
-        
+        $str .= "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine . $this->endLine;
+
+        $caller = $this->resolveCallerFrame();
+
         ob_start();
         echo ($caller['file'] ?? 'unknown') . ' ' . ($caller['line'] ?? 0) . $this->endLine;
-        
+
         foreach ($vars as $var) {
             $this->parser->parse($var);
             echo $this->endLine;
         }
-        
-        $str .= ob_get_clean() .  $this->endLine;
+
+        $str .= ob_get_clean() . $this->endLine;
         $this->logRaw($str);
-        $this->numberOfCalls++;
+        ++$this->numberOfCalls;
     }
 
     public function backTrace(bool $reverse = false, ?int $limit = null): void
     {
         $cntCall = 0;
         $message = $this->printFirstLine();
-        $backTraceStack = debug_backtrace();
+
+        $traceLimit = null !== $limit ? $limit + 1 : 0;
+        $backTraceStack = 0 === $traceLimit
+            ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+            : debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $traceLimit);
+
+        array_shift($backTraceStack);
+
         if ($reverse) {
             $backTraceStack = array_reverse($backTraceStack);
         }
-        foreach($backTraceStack as $backTraceRow) {
-            if ($limit !== null && $limit <= $cntCall) {
+
+        foreach ($backTraceStack as $backTraceRow) {
+            if (null !== $limit && $limit <= $cntCall) {
                 break;
             }
-            
+
             $file = $backTraceRow['file'] ?? 'unknown';
             $line = $backTraceRow['line'] ?? '?';
-            
-            $message .= "[{$this->numberOfCalls}][{$cntCall}]: " . $file . ':' . $line . $this->endLine;
-            $cntCall++;
+
+            $message .= "[{$this->numberOfCalls}][{$cntCall}]: {$file}:{$line}{$this->endLine}";
+            ++$cntCall;
         }
 
         $this->logRaw($message);
-        $this->numberOfCalls++;
+        ++$this->numberOfCalls;
     }
 
     /**
      * Start timing.
-     *
-     * @return void
      */
     public function startTime(): void
     {
-        $this->lastTime = $this->time = \microtime(true);
+        $this->lastTime = $this->time = microtime(true);
     }
-    
+
     /**
      * Stop the stopwatch and measure the time.
-     *
-     * @param string $label
-     * @return float
      */
     public function stopTime(string $label = ''): float
     {
-        $mt = \microtime(true);
+        $mt = microtime(true);
         $t = $mt - $this->time;
         $t1 = $mt - $this->lastTime;
-        $str = '';
-        if (!empty($label)) {
-            $str = "[$label]";
+
+        $labelPart = '';
+        if ('' !== $label) {
+            $labelPart = "[{$label}]";
         }
-        $this->logRaw('>TIME ' . $this->cntTime . "{$str}: {$t}s, {$t1}s".$this->endLine);
+
+        $this->logRaw('>TIME ' . $this->cntTime . "{$labelPart}: {$t}s, {$t1}s" . $this->endLine);
         ++$this->cntTime;
         $this->lastTime = $mt;
-        
+
         return $t;
     }
 
@@ -178,12 +152,6 @@ class Debugger
         }
     }
 
-    /**
-     * Error number to string.
-     *
-     * @param integer $errNo
-     * @return string
-     */
     private function errorNumberToString(int $errNo): string
     {
         return match ($errNo) {
@@ -194,16 +162,42 @@ class Debugger
         };
     }
 
-    private function printFirstLine(): string
+    /**
+     * Returns the frame that called Debugger::varDump().
+     *
+     * @return array<string, mixed>
+     */
+    private function resolveCallerFrame(): array
     {
-        $line = '';
-        if (0 === $this->numberOfCalls){
-            for($i=0; $i < 48; ++$i){
-                $line .= '-';
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        foreach ($backtrace as $frame) {
+            if (!isset($frame['file'])) {
+                continue;
             }
-            $line .= $this->endLine;
+
+            $file = (string) $frame['file'];
+
+            if ($file === __FILE__) {
+                continue;
+            }
+
+            if (str_contains($file, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'phpunit' . DIRECTORY_SEPARATOR)) {
+                continue;
+            }
+
+            return $frame;
         }
 
-        return $line;
+        return ['file' => 'unknown', 'line' => 0];
+    }
+
+    private function printFirstLine(): string
+    {
+        if (0 === $this->numberOfCalls) {
+            return str_repeat('-', 48) . $this->endLine;
+        }
+
+        return '';
     }
 }

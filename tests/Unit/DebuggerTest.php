@@ -19,16 +19,21 @@ final class DebuggerTest extends TestCase
         $log = $this->createMock(LogInterface::class);
         $parser = $this->createMock(ParserInterface::class);
 
-        $log->expects($this->once())->method('log');
+        $capturedMessage = null;
+        $log->expects($this->once())
+            ->method('log')
+            ->willReturnCallback(static function (string $message) use (&$capturedMessage): void {
+                $capturedMessage = $message;
+            });
 
-        Debugger::clearInstance();
-        $sut = Debugger::getInstance($log, $parser);
+        $sut = new Debugger($log, $parser);
 
         // Act
         $sut->varDump('test');
 
         // Assert
-        // Assertions are performed by mock expectations.
+        self::assertIsString($capturedMessage);
+        self::assertStringContainsString('DebuggerTest.php', $capturedMessage);
     }
 
     public function testBackTraceLogsOutput(): void
@@ -39,8 +44,7 @@ final class DebuggerTest extends TestCase
 
         $log->expects($this->once())->method('log');
 
-        Debugger::clearInstance();
-        $sut = Debugger::getInstance($log, $parser);
+        $sut = new Debugger($log, $parser);
 
         // Act
         $sut->backTrace();
