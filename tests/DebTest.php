@@ -1,17 +1,5 @@
 <?php
 
-namespace Tests\AdachSoft\Debugger;
+declare(strict_types=1);
 
-use AdachSoft\Debugger\Deb;
-use AdachSoft\Debugger\Debugger;
-use PHPUnit\Framework\TestCase;
-
-class DebTest extends TestCase
-{
-    public function test(): void
-    {
-        $result = Deb::get();
-
-        $this->assertInstanceOf(Debugger::class, $result);
-    }
-}
+// Tests have been moved to tests/Unit.
