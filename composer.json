@@ -23,7 +23,10 @@
     "autoload": {
         "psr-4": {
             "AdachSoft\\Debugger\\": "src"
-        }
+        },
+        "files": [
+            "src/D.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

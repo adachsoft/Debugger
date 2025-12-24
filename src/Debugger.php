@@ -92,11 +92,7 @@ class Debugger
         $cntCall = 0;
         $message = $this->printFirstLine();
 
-        $traceLimit = null !== $limit ? $limit + 1 : 0;
-        $backTraceStack = 0 === $traceLimit
-            ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-            : debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $traceLimit);
-
+        $backTraceStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         array_shift($backTraceStack);
 
         if ($reverse) {
@@ -104,6 +100,10 @@ class Debugger
         }
 
         foreach ($backTraceStack as $backTraceRow) {
+            if ($this->shouldSkipFrame($backTraceRow)) {
+                continue;
+            }
+
             if (null !== $limit && $limit <= $cntCall) {
                 break;
             }
@@ -175,17 +175,7 @@ class Debugger
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
         foreach ($backtrace as $frame) {
-            if (!isset($frame['file'])) {
-                continue;
-            }
-
-            $file = (string) $frame['file'];
-
-            if ($file === __FILE__) {
-                continue;
-            }
-
-            if (str_contains($file, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'phpunit' . DIRECTORY_SEPARATOR)) {
+            if ($this->shouldSkipFrame($frame)) {
                 continue;
             }
 
@@ -193,6 +183,53 @@ class Debugger
         }
 
         return ['file' => 'unknown', 'line' => 0];
+    }
+
+    /**
+     * @param array<string, mixed> $frame
+     */
+    private function shouldSkipFrame(array $frame): bool
+    {
+        if (!isset($frame['file'])) {
+            return true;
+        }
+
+        $class = $frame['class'] ?? null;
+        if (is_string($class)) {
+            if (str_starts_with($class, __NAMESPACE__ . '\\')) {
+                return true;
+            }
+
+            if ($class === 'D') {
+                return true;
+            }
+        }
+
+        $function = $frame['function'] ?? null;
+        if ($function === 'd') {
+            return true;
+        }
+
+        $file = $this->normalizePath((string) $frame['file']);
+
+        if ($file === $this->normalizePath(__FILE__)) {
+            return true;
+        }
+
+        if (str_contains($file, '/vendor/phpunit/')) {
+            return true;
+        }
+
+        if (str_contains($file, '/vendor/bin/phpunit')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function normalizePath(string $path): string
+    {
+        return str_replace('\\', '/', $path);
     }
 
     private function printFirstLine(): string
