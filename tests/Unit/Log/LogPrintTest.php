@@ -8,6 +8,7 @@ use AdachSoft\Debugger\Log\LogInterface;
 use AdachSoft\Debugger\Log\LogPrint;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Tests\Shared\ConsoleIo\TestDouble\SpyOutput;
 
 #[CoversClass(LogPrint::class)]
 final class LogPrintTest extends TestCase
@@ -21,19 +22,19 @@ final class LogPrintTest extends TestCase
         $result = $sut;
 
         // Assert
-        $this->assertInstanceOf(LogInterface::class, $result);
+        self::assertInstanceOf(LogInterface::class, $result);
     }
 
-    public function testLogPrintsMessage(): void
+    public function testLogWritesMessageToOutput(): void
     {
         // Arrange
-        $sut = new LogPrint();
-        $this->expectOutputString('test message');
+        $output = new SpyOutput();
+        $sut = new LogPrint($output);
 
         // Act
         $sut->log('test message');
 
         // Assert
-        // Assertions are performed by expectOutputString().
+        self::assertSame('test message', $output->getOutput());
     }
 }

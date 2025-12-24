@@ -14,7 +14,8 @@
         }
     ],
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "adachsoft/console-io": "^0.1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "12.4"

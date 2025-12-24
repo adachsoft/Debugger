@@ -11,14 +11,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ParserPrintR::class)]
 final class ParserPrintRTest extends TestCase
 {
-    public function testParseUsesPrintR(): void
+    public function testParseReturnsPrintRString(): void
     {
+        // Arrange
         $parser = new ParserPrintR();
-        
-        ob_start();
-        $parser->parse(['a' => 1]);
-        $output = ob_get_clean();
 
-        $this->assertStringContainsString('[a] => 1', $output);
+        // Act
+        $result = $parser->parse(['a' => 1]);
+
+        // Assert
+        self::assertStringContainsString('[a] => 1', $result);
     }
 }

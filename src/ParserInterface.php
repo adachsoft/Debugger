@@ -6,5 +6,8 @@ namespace AdachSoft\Debugger;
 
 interface ParserInterface
 {
-    public function parse(mixed $variable): void;
+    /**
+     * Parse the variable and return its textual representation.
+     */
+    public function parse(mixed $variable): string;
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AdachSoft\Debugger;
 
-class ParserPrintR implements ParserInterface
+final class ParserPrintR implements ParserInterface
 {
-    public function parse(mixed $variable): void
+    public function parse(mixed $variable): string
     {
-        print_r($variable);
+        return print_r($variable, true);
     }
 }

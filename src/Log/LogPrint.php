@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace AdachSoft\Debugger\Log;
 
-class LogPrint implements LogInterface
+use Adachsoft\ConsoleIo\Output\CliOutput;
+use Adachsoft\ConsoleIo\Output\OutputInterface;
+
+final class LogPrint implements LogInterface
 {
+    public function __construct(
+        private readonly OutputInterface $output = new CliOutput()
+    ) {
+    }
+
     /**
      * {@inheritDoc}
      */
     public function log(string $message): void
     {
-        echo $message;
+        $this->output->write($message);
     }
 }

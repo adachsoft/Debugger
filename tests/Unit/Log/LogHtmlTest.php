@@ -8,6 +8,7 @@ use AdachSoft\Debugger\Log\LogHtml;
 use AdachSoft\Debugger\Log\LogInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Tests\Shared\ConsoleIo\TestDouble\SpyOutput;
 
 #[CoversClass(LogHtml::class)]
 final class LogHtmlTest extends TestCase
@@ -21,19 +22,19 @@ final class LogHtmlTest extends TestCase
         $result = $sut;
 
         // Assert
-        $this->assertInstanceOf(LogInterface::class, $result);
+        self::assertInstanceOf(LogInterface::class, $result);
     }
 
     public function testLogEscapesAndFormatsHtml(): void
     {
         // Arrange
-        $sut = new LogHtml();
-        $this->expectOutputString('<pre>&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</pre>');
+        $output = new SpyOutput();
+        $sut = new LogHtml($output);
 
         // Act
         $sut->log('<script>alert("xss")</script>');
 
         // Assert
-        // Assertions are performed by expectOutputString().
+        self::assertSame('<pre>&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</pre>', $output->getOutput());
     }
 }

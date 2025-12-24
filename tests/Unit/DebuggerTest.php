@@ -19,6 +19,8 @@ final class DebuggerTest extends TestCase
         $log = $this->createMock(LogInterface::class);
         $parser = $this->createMock(ParserInterface::class);
 
+        $parser->method('parse')->willReturn('parsed');
+
         $capturedMessage = null;
         $log->expects($this->once())
             ->method('log')

@@ -6,19 +6,36 @@ namespace AdachSoft\Debugger\Parser;
 
 use AdachSoft\Debugger\ParserInterface;
 
-class TypeWithoutValueParser implements ParserInterface
+final class TypeWithoutValueParser implements ParserInterface
 {
-    public function parse(mixed $variable): void
+    public function parse(mixed $variable): string
     {
-        echo gettype($variable);
+        $result = gettype($variable);
+
         if (is_object($variable)) {
-            echo ':' . get_class($variable);
-        } elseif (is_resource($variable)) {
-            echo ':' . get_resource_type($variable);
-        } elseif (is_array($variable)) {
-            echo ':' . count($variable);
-        } elseif (is_string($variable)) {
-            echo ':' . strlen($variable);
+            $result .= ':' . get_class($variable);
+
+            return $result;
         }
+
+        if (is_resource($variable)) {
+            $result .= ':' . get_resource_type($variable);
+
+            return $result;
+        }
+
+        if (is_array($variable)) {
+            $result .= ':' . count($variable);
+
+            return $result;
+        }
+
+        if (is_string($variable)) {
+            $result .= ':' . strlen($variable);
+
+            return $result;
+        }
+
+        return $result;
     }
 }

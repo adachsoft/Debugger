@@ -11,14 +11,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ParserVarDump::class)]
 final class ParserVarDumpTest extends TestCase
 {
-    public function testParseUsesVarDump(): void
+    public function testParseReturnsVarDumpString(): void
     {
+        // Arrange
         $parser = new ParserVarDump();
-        
-        ob_start();
-        $parser->parse('test');
-        $output = ob_get_clean();
 
-        $this->assertStringContainsString('string(4) "test"', $output);
+        // Act
+        $result = $parser->parse('test');
+
+        // Assert
+        self::assertStringContainsString('string(4) "test"', $result);
     }
 }

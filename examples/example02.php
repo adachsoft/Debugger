@@ -16,4 +16,4 @@ $t = $r + $b;
 
 // Trigger undefined variable warning
 /** @noinspection PhpUndefinedVariableInspection */
-echo $g;
+$unused = $g;

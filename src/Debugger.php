@@ -71,15 +71,18 @@ class Debugger
 
         $caller = $this->resolveCallerFrame();
 
-        ob_start();
-        echo ($caller['file'] ?? 'unknown') . ' ' . ($caller['line'] ?? 0) . $this->endLine;
+        $file = (string) ($caller['file'] ?? 'unknown');
+        $line = (int) ($caller['line'] ?? 0);
+
+        $str .= $file . ' ' . $line . $this->endLine;
 
         foreach ($vars as $var) {
-            $this->parser->parse($var);
-            echo $this->endLine;
+            $parsed = rtrim($this->parser->parse($var), "\r\n");
+            $str .= $parsed . $this->endLine . $this->endLine;
         }
 
-        $str .= ob_get_clean() . $this->endLine;
+        $str .= $this->endLine;
+
         $this->logRaw($str);
         ++$this->numberOfCalls;
     }

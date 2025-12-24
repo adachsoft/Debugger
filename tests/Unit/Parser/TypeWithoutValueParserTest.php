@@ -22,11 +22,11 @@ final class TypeWithoutValueParserTest extends TestCase
         $result = $sut;
 
         // Assert
-        $this->assertInstanceOf(ParserInterface::class, $result);
+        self::assertInstanceOf(ParserInterface::class, $result);
     }
 
     #[DataProvider('provideParseCases')]
-    public function testParsePrintsTypeInformation(string $expected, mixed $value): void
+    public function testParseReturnsTypeInformation(string $expected, mixed $value): void
     {
         // Arrange
         $sut = new TypeWithoutValueParser();
@@ -37,13 +37,11 @@ final class TypeWithoutValueParserTest extends TestCase
             $value = $factory();
         }
 
-        $this->expectOutputString($expected);
-
         // Act
-        $sut->parse($value);
+        $result = $sut->parse($value);
 
         // Assert
-        // Assertions are performed by expectOutputString().
+        self::assertSame($expected, $result);
 
         if (is_resource($value)) {
             fclose($value);
@@ -56,24 +54,24 @@ final class TypeWithoutValueParserTest extends TestCase
     public static function provideParseCases(): array
     {
         return [
-            'string prints length' => ['string:4', 'test'],
-            'integer prints type' => ['integer', 112],
-            'null prints type' => ['NULL', null],
-            'integer zero prints type' => ['integer', 0],
-            'double zero prints type' => ['double', 0.0],
-            'string zero prints length' => ['string:1', '0'],
-            'empty string prints length' => ['string:0', ''],
-            'array prints count' => ['array:3', [12, 72, 360]],
-            'empty array prints count' => ['array:0', []],
-            'object prints class name' => [
+            'string returns length' => ['string:4', 'test'],
+            'integer returns type' => ['integer', 112],
+            'null returns type' => ['NULL', null],
+            'integer zero returns type' => ['integer', 0],
+            'double zero returns type' => ['double', 0.0],
+            'string zero returns length' => ['string:1', '0'],
+            'empty string returns length' => ['string:0', ''],
+            'array returns count' => ['array:3', [12, 72, 360]],
+            'empty array returns count' => ['array:0', []],
+            'object returns class name' => [
                 'object:AdachSoft\\Debugger\\Parser\\TypeWithoutValueParser',
                 new TypeWithoutValueParser(),
             ],
-            'boolean prints type' => ['boolean', false],
-            'double prints type' => ['double', 1.618],
-            'closure prints class name' => ['object:Closure', static function (): void {
+            'boolean returns type' => ['boolean', false],
+            'double returns type' => ['double', 1.618],
+            'closure returns class name' => ['object:Closure', static function (): void {
             }],
-            'resource prints resource type' => [
+            'resource returns resource type' => [
                 'resource:stream',
                 ['__factory__' => static fn (): mixed => fopen('php://memory', 'w')],
             ],
