@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdachSoft\Debugger\Log;
 
 class LogHtml implements LogInterface
@@ -9,6 +11,7 @@ class LogHtml implements LogInterface
      */
     public function log(string $message): void
     {
-        echo "<pre>{$message}</pre>";
+        $safeMessage = htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        echo "<pre>{$safeMessage}</pre>";
     }
 }

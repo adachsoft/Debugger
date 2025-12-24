@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdachSoft\Debugger;
 
 interface ParserInterface
 {
-    public function parse($variable): void;
+    public function parse(mixed $variable): void;
 }

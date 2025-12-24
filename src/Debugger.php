@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdachSoft\Debugger;
 
 use AdachSoft\Debugger\Log\LogInterface;
@@ -10,56 +12,33 @@ class Debugger
 
     /**
      * Determines whether logs are enabled.
-     *
-     * @var boolean
      */
-    public $isOn = true;
+    public bool $isOn = true;
 
-    /**
-     * @var string
-     */
-    public $dateFormat = 'Y-m-d H:i:s';
+    public string $dateFormat = 'Y-m-d H:i:s';
 
-    /**
-     * @var string
-     */
-    public $endLine = PHP_EOL;
+    public string $endLine = PHP_EOL;
 
     /**
      * Log class.
-     *
-     * @var LogInterface
      */
-    private $logClass;
+    private LogInterface $logClass;
 
     /**
      * Parser class;
-     *
-     * @var ParserInterface
      */
-    private $parser;
+    private ParserInterface $parser;
 
-    /**
-     * @var float
-     */
-    private $time = 0.0;
+    private float $time = 0.0;
     
-    /**
-     * @var float
-     */
-    private $lastTime = 0.0;
+    private float $lastTime = 0.0;
 
-    /**
-     * @var integer
-     */
-    private $cntTime = 0;
+    private int $cntTime = 0;
 
     /**
      * Number of calls.
-     *
-     * @var integer
      */
-    private $numberOfCalls = 0;
+    private int $numberOfCalls = 0;
 
     private function __construct(LogInterface $logClass, ParserInterface $parser)
     {
@@ -68,7 +47,7 @@ class Debugger
     }
 
     /**
-     * Get get instance.
+     * Get instance.
      *
      * @param LogInterface $logClass
      * @param ParserInterface $parser
@@ -78,48 +57,59 @@ class Debugger
     {
         if (null === self::$singleton) {
             self::$singleton = new self($logClass, $parser);
+        } else {
+            // Fix: Update dependencies to ensure the requested configuration is applied
+            self::$singleton->logClass = $logClass;
+            self::$singleton->parser = $parser;
         }
 
         return self::$singleton;
     }
 
     /**
-     * Display all erros.
+     * Display all errors.
      *
      * @return void
      */
-    public static function showAllErrors()
+    public static function showAllErrors(): void
     {
         error_reporting(E_ALL);
-        ini_set('display_errors', 1);
+        ini_set('display_errors', '1');
     }
 
-    public function setErrorHandler()
+    public function setErrorHandler(): void
     {
         set_error_handler([$this, 'errorHandler']);
     }
 
-    public function errorHandler(int $errno, string $errstr, string $errfile, int $errline)
+    public function errorHandler(int $errno, string $errstr, string $errfile, int $errline): bool
     {
+        if (!(error_reporting() & $errno)) {
+            return false;
+        }
+
         $str = $this->errorNumberToString($errno) . "[" . date($this->dateFormat) . "]: {$this->endLine}{$errstr} in {$errfile} {$errline}" . $this->endLine . $this->endLine;
         $this->logRaw($str);
 
         return true;
     }
 
-    public function varDump(): void
+    public function varDump(mixed ...$vars): void
     {
         $str = $this->printFirstLine();
         $str .= "VAR_DUMP[{$this->numberOfCalls}]: " . date($this->dateFormat) . $this->endLine .  $this->endLine;
-        $bt = debug_backtrace();
-        $caller = array_shift($bt);
+        
+        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $caller = $bt[0] ?? ['file' => 'unknown', 'line' => 0];
+        
         ob_start();
-        echo $caller['file'] . ' ' . $caller['line'] . $this->endLine;
-        $numargs = func_num_args();
-        for ($i = 0; $i < $numargs; ++$i) {
-            $this->parser->parse(func_get_arg($i));
+        echo ($caller['file'] ?? 'unknown') . ' ' . ($caller['line'] ?? 0) . $this->endLine;
+        
+        foreach ($vars as $var) {
+            $this->parser->parse($var);
             echo $this->endLine;
         }
+        
         $str .= ob_get_clean() .  $this->endLine;
         $this->logRaw($str);
         $this->numberOfCalls++;
@@ -137,7 +127,11 @@ class Debugger
             if ($limit !== null && $limit <= $cntCall) {
                 break;
             }
-            $message .= "[{$this->numberOfCalls}][{$cntCall}]: " . $backTraceRow['file'] . ':' . $backTraceRow['line'] . $this->endLine;
+            
+            $file = $backTraceRow['file'] ?? 'unknown';
+            $line = $backTraceRow['line'] ?? '?';
+            
+            $message .= "[{$this->numberOfCalls}][{$cntCall}]: " . $file . ':' . $line . $this->endLine;
             $cntCall++;
         }
 
@@ -177,7 +171,7 @@ class Debugger
         return $t;
     }
 
-    private function logRaw(string $log)
+    private function logRaw(string $log): void
     {
         if ($this->isOn) {
             $this->logClass->log($log);
@@ -192,19 +186,12 @@ class Debugger
      */
     private function errorNumberToString(int $errNo): string
     {
-        switch ($errNo) {
-            case E_USER_ERROR:
-            case E_ERROR:
-                return 'ERROR';
-            case E_USER_WARNING:
-            case E_WARNING:
-                return 'WARNING';
-            case E_USER_NOTICE:
-            case E_NOTICE:
-                return 'NOTICE';
-        }
-
-        return 'UNKNOWN ERROR';
+        return match ($errNo) {
+            E_USER_ERROR, E_ERROR => 'ERROR',
+            E_USER_WARNING, E_WARNING => 'WARNING',
+            E_USER_NOTICE, E_NOTICE => 'NOTICE',
+            default => 'UNKNOWN ERROR',
+        };
     }
 
     private function printFirstLine(): string

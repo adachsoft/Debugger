@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdachSoft\Debugger;
 
+use AdachSoft\Debugger\Log\LogInterface;
 use AdachSoft\Debugger\Log\LogToServer;
 use AdachSoft\Debugger\Parser\TypeWithoutValueParser;
 

@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdachSoft\Debugger;
+
+use LogicException;
 
 /**
  * Define singleton trait.
@@ -8,9 +12,9 @@ namespace AdachSoft\Debugger;
 trait SingletonTrait
 {
     /**
-    * Singleton object.
-    */
-    private static $singleton;
+     * Singleton object.
+     */
+    private static ?self $singleton = null;
 
     /**
      * Hide constructor.
@@ -18,11 +22,9 @@ trait SingletonTrait
     private function __construct()
     {
     }
-    
+
     /**
      * Prevent cloning of the instance.
-     *
-     * @return void
      */
     protected function __clone()
     {
@@ -30,27 +32,27 @@ trait SingletonTrait
 
     /**
      * Prevent serialization of the instance.
-     *
-     * @return array
      */
-    protected function __sleep()
+    public function __serialize(): array
     {
+        throw new LogicException('Cannot serialize a singleton.');
     }
 
     /**
      * Prevent deserialization of the instance.
      */
-    protected function __wakeup()
+    public function __unserialize(array $data): void
     {
+        throw new LogicException('Cannot unserialize a singleton.');
     }
 
     /**
      * Get an instance of the class.
      */
-    public static function getInstance()
+    public static function getInstance(): static
     {
         if (null === self::$singleton) {
-            self::$singleton = new self();
+            self::$singleton = new static();
         }
 
         return self::$singleton;

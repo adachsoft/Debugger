@@ -1,4 +1,53 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Project-specific ignores
+/_src/
+/_tests/
+/_bin/
+
+# Folders to ignore
+.bin/
+.tasks/
+.examples/
+
+# PHPUnit
+/.phpunit.cache/
+/coverage-html/
+
+# Composer
 composer.lock
-vendor
-*.cache
-.idea
+
+# Log files
+*.log
+logs/
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# PHP CS Fixer
+.php-cs-fixer.cache
+
+.phpunit.result.cache
+
+.env
+
+# Composer data files
+data/lib.json
+
+# Task management
+docs/tasks/
+# Project docs
+.docs/
+/vendor/
+/var/
+/.php-cs-fixer.cache
+/.phpunit.result.cache
+/.phpunit.cache/
+/.idea/
+/.vscode/
+composer.lock
