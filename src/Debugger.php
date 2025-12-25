@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdachSoft\Debugger;
 
 use AdachSoft\Debugger\Log\LogInterface;
+use ReflectionClass;
 
 class Debugger
 {
@@ -57,7 +58,12 @@ class Debugger
         $str = $this->errorNumberToString($errno)
             . '['
             . date($this->dateFormat)
-            . "]: {$this->endLine}{$errstr} in {$errfile} {$errline}{$this->endLine}{$this->endLine}";
+            . ']:'
+            . $this->endLine
+            . $errstr
+            . " in {$errfile} {$errline}"
+            . $this->endLine
+            . $this->endLine;
 
         $this->logRaw($str);
 
@@ -194,34 +200,27 @@ class Debugger
             return true;
         }
 
-        $class = $frame['class'] ?? null;
-        if (is_string($class)) {
-            if (str_starts_with($class, __NAMESPACE__ . '\\')) {
-                return true;
-            }
-
-            if ($class === 'D') {
-                return true;
-            }
-        }
-
-        $function = $frame['function'] ?? null;
-        if ($function === 'd') {
-            return true;
-        }
-
         $file = $this->normalizePath((string) $frame['file']);
 
+        // Skip Debugger itself
         if ($file === $this->normalizePath(__FILE__)) {
             return true;
         }
 
+        // Skip PHPUnit
         if (str_contains($file, '/vendor/phpunit/')) {
             return true;
         }
-
         if (str_contains($file, '/vendor/bin/phpunit')) {
             return true;
+        }
+
+        // Skip Global Facade D
+        if (class_exists('D')) {
+            $dFile = (new ReflectionClass('D'))->getFileName();
+            if ($dFile && $this->normalizePath($dFile) === $file) {
+                return true;
+            }
         }
 
         return false;

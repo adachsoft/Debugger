@@ -54,4 +54,35 @@ final class DebuggerTest extends TestCase
         // Assert
         // Assertions are performed by mock expectations.
     }
+
+    public function testErrorHandlerLogsWithoutGarbage(): void
+    {
+        // Arrange
+        $previousErrorReporting = error_reporting();
+        error_reporting(E_ALL);
+
+        try {
+            $log = $this->createMock(LogInterface::class);
+            $parser = $this->createMock(ParserInterface::class);
+
+            $capturedMessage = null;
+            $log->expects($this->once())
+                ->method('log')
+                ->willReturnCallback(static function (string $message) use (&$capturedMessage): void {
+                    $capturedMessage = $message;
+                });
+
+            $sut = new Debugger($log, $parser);
+
+            // Act
+            $sut->errorHandler(E_USER_NOTICE, 'Test Error', 'test_file.php', 123);
+
+            // Assert
+            self::assertIsString($capturedMessage);
+            self::assertFalse(str_ends_with($capturedMessage, '\\"'));
+            self::assertFalse(str_ends_with($capturedMessage, '"'));
+        } finally {
+            error_reporting($previousErrorReporting);
+        }
+    }
 }
