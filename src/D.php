@@ -91,3 +91,13 @@ if (!function_exists('d')) {
         D::dump(...$vars);
     }
 }
+
+if (!function_exists('t')) {
+    /**
+     * Global helper shortcut for D::trace().
+     */
+    function t(bool $reverse = false, ?int $limit = null): void
+    {
+        D::trace(reverse: $reverse, limit: $limit);
+    }
+}

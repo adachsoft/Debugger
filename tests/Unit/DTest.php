@@ -95,4 +95,31 @@ final class DTest extends TestCase
         self::assertStringContainsString(__FILE__, $capturedMessage);
         self::assertStringNotContainsString('src/D.php', $capturedMessage);
     }
+
+    public function testGlobalFunctionTCallsFacadeTrace(): void
+    {
+        // Arrange
+        self::assertTrue(function_exists('t'));
+
+        $log = $this->createMock(LogInterface::class);
+        $parser = $this->createMock(ParserInterface::class);
+
+        $capturedMessage = null;
+        $log->expects(self::once())
+            ->method('log')
+            ->willReturnCallback(static function (string $message) use (&$capturedMessage): void {
+                $capturedMessage = $message;
+            });
+
+        $debugger = new Debugger($log, $parser);
+        \D::setInstance($debugger);
+
+        // Act
+        t();
+
+        // Assert
+        self::assertIsString($capturedMessage);
+        self::assertStringContainsString(__FILE__, $capturedMessage);
+        self::assertStringNotContainsString('src/D.php', $capturedMessage);
+    }
 }
