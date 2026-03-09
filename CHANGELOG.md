@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0] - 2025-03-09
+
+### Changed
+
+- Updated adachsoft/console-io dependency from ^0.1.0 to ^0.2
+
 ## [0.1.0] - 2025-12-25
 
 ### Added
@@ -15,4 +21,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - Call-site resolution: `d()` / `D::dump()` now reports the real user file/line instead of the facade file.
-- `Debugger::errorHandler()` no longer appends garbage `\"` to the log message.
+- `Debugger::errorHandler()` no longer appends garbage `"` to the log message.
